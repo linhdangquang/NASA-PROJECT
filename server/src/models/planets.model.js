@@ -39,3 +39,6 @@ export const loadPlanetsData = () => {
       });
   });
 }
+export function getAllPlanets() { 
+  return habitablePlanets;
+}
