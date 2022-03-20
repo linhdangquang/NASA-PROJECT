@@ -1,4 +1,4 @@
-const launches = new Map()
+const launches = new Map();
 
 let latestFlightNumber = 100;
 
@@ -11,19 +11,36 @@ const launch = {
   customer: ['NASA', 'SpaceX'],
   upcoming: true,
   success: true,
-}
+};
 
-launches.set(launch.flightNumber, launch)
+launches.set(launch.flightNumber, launch);
+
+export const existLaunch = (flightNumber) => {
+  return launches.has(flightNumber);
+};
 
 export function getAllLaunches() {
-  return Array.from(launches.values())
+  return Array.from(launches.values());
 }
 
-export const addNewLaunch =(launch) => {
-  latestFlightNumber++
-  launches.set(latestFlightNumber , Object.assign(launch, {   
-    success: false,
-    upcoming: true,
-    customers: ['dsadsa', 'dsadsa'],
-    flightNumber: latestFlightNumber }))
-}
+export const abortedLaunchById = (flightNumber) => {
+  const aborted = launches.get(flightNumber);
+  aborted.upcoming = false;
+  aborted.success = false;
+  return aborted;
+};
+
+
+export const addNewLaunch = (launch) => {
+  latestFlightNumber++;
+  launches.set(
+    latestFlightNumber,
+    Object.assign(launch, {
+      success: true,
+      upcoming: true,
+      customers: ['dsadsa', 'dsadsa'],
+      flightNumber: latestFlightNumber,
+    })
+  );
+};
+
