@@ -7,7 +7,7 @@ const launch = {
   mission: 'Komodo Dragon',
   rocket: 'Falcon 9',
   launchDate: new Date('Dec 17, 2030'),
-  destination: 'Kodiak Island, Alaska',
+  target: 'Kodiak Island, Alaska',
   customer: ['NASA', 'SpaceX'],
   upcoming: true,
   success: true,
