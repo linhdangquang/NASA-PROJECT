@@ -8,7 +8,8 @@
     "test": "jest",
     "test-watch": "jest --watch",
     "watch": "nodemon ./src/server.js --exec babel-node -e js",
-    "start": "nodemon ./src/server.js --exec babel-node -e js"
+    "start": "nodemon ./src/server.js --exec babel-node -e js",
+    "cluster": "pm2 start ./src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -17,13 +18,10 @@
     "cors": "^2.8.5",
     "csv-parse": "^5.0.4",
     "express": "^4.17.3",
+    "mongoose": "^6.2.8",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/plugin-proposal-class-properties": "^7.16.7",
-    "@babel/plugin-transform-runtime": "^7.17.0",
-    "@babel/preset-env": "^7.16.11",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
