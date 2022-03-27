@@ -31,7 +31,7 @@ const Upcoming = props => {
         return <tr key={String(launch.flightNumber)}>
           <td>
             <Clickable style={{color:"red"}}>
-              <Link className={classes.link} onClick={() => abortLaunch(launch.flightNumber)}>
+              <Link className={classes.link} onClick={  () =>  abortLaunch(launch.flightNumber)}>
                 ✖
               </Link>
             </Clickable>

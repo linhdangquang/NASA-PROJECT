@@ -1,6 +1,6 @@
-import { addNewLaunch, getAllLaunches, existLaunch, abortedLaunchById } from '../../models/launches.model';
-export function httpGetAllLaunches(req, res){
-  return res.status(200).json(getAllLaunches());
+import { addNewLaunch, getAllLaunches, existLaunch, abortedLaunchById, scheduleLaunch } from '../../models/launches.model';
+export async function httpGetAllLaunches(req, res){
+  return res.status(200).json(await getAllLaunches());
 }
 
 export const httpAddNewLaunch = (req, res)=>{
@@ -19,18 +19,20 @@ export const httpAddNewLaunch = (req, res)=>{
     });
     
   }
-  addNewLaunch(launch);
+  scheduleLaunch(launch);
   return res.status(201).json(launch);
 }
 
-export const httpAbortLaunch = (req, res)=>{
+export const httpAbortLaunch = async (req, res)=>{
   const launchId = Number(req.params.id);
-  if(!existLaunch(launchId)){
+
+  const existLaunches = await existLaunch(launchId);
+  if(!existLaunches){
     return res.status(404).json({
       error: 'Not Found'
     });
   }
-  const aborted = abortedLaunchById(launchId);
+  const aborted = await abortedLaunchById(launchId);
   return res.status(200).json(aborted);
 }
 
