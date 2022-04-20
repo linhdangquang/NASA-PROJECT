@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime';
+
 import { addNewLaunch, getAllLaunches, existLaunch, abortedLaunchById, scheduleLaunch } from '../../models/launches.model';
 import {getPagination} from '../../services/query'
 export async function httpGetAllLaunches(req, res){

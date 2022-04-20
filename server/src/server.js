@@ -1,8 +1,10 @@
+require('dotenv').config();
 import app from './app';
+import 'regenerator-runtime/runtime';
 const mongoose = require('mongoose');
 const http = require('http');
-const PORT = process.env.PORT || 4000;
-const MONGO_URL = 'mongodb+srv://admin:111112113aA@nasa.dtsdf.mongodb.net/nasa?retryWrites=true&w=majority'
+const PORT = process.env.PORT || 8000;
+const MONGO_URL = process.env.MONGO_URL || 'mongodb+srv://admin:111112113aA@nasa.dtsdf.mongodb.net/nasa?retryWrites=true&w=majority';
 
 const {loadPlanetsData } = require('./models/planets.model');
 const {loadLaunchesData} = require('./models/launches.model');
