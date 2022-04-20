@@ -1,6 +1,9 @@
 import { addNewLaunch, getAllLaunches, existLaunch, abortedLaunchById, scheduleLaunch } from '../../models/launches.model';
+import {getPagination} from '../../services/query'
 export async function httpGetAllLaunches(req, res){
-  return res.status(200).json(await getAllLaunches());
+  const {skip, limit} = getPagination(req.query);
+  const launches= await getAllLaunches(skip,limit);
+  return res.status(200).json(launches);
 }
 
 export const httpAddNewLaunch = (req, res)=>{
@@ -30,7 +33,7 @@ export const httpAbortLaunch = async (req, res)=>{
   if(!existLaunches){
     return res.status(404).json({
       error: 'Not Found'
-    });
+    }); 
   }
   const aborted = await abortedLaunchById(launchId);
   return res.status(200).json(aborted);

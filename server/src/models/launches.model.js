@@ -5,18 +5,6 @@ import axios from 'axios';
 
 let DEFAULT_FLIGHT_NUMBER = 100;
 
-const launch = {
-  flightNumber: 100, //flight_number,
-  mission: 'Komodo Dragon', //name
-  rocket: 'Falcon 9', //rocket_name,
-  launchDate: new Date('Dec 17, 2030'), //date_local
-  target: 'Kepler-1410 b', //not applicable
-  customers: ['NASA', 'SpaceX'], //payload.customers for each payload
-  upcoming: true, // upcoming
-  success: true, // success
-};
-
-saveLaunch(launch);
 
 const SPACEX_API_URL = 'https://api.spacexdata.com/v4/launches/query';
 
@@ -42,6 +30,12 @@ async function populateLaunches() {
       ],
     },
   });
+
+  if(res.status !== 200) {
+    console.log('Error loading data');
+    throw new Error('Error loading data');
+  }
+  
   const launchDocs = res.data.docs;
   for(const launchDoc of launchDocs) {
     const payloads = launchDoc['payloads'];
@@ -61,6 +55,7 @@ async function populateLaunches() {
     console.log(`Saving launch ${launch.flightNumber} ${launch.mission}`);
 
     // populate launches collection
+    await saveLaunch(launch);
   }
 }
 
@@ -94,24 +89,21 @@ async function getLatestFlightNumber() {
   return latestLaunch ? latestLaunch.flightNumber : DEFAULT_FLIGHT_NUMBER;
 }
 
-export async function getAllLaunches() {
+export async function getAllLaunches(skip, limit) {
   return await launchesModel.find(
     {},
     {
       _id: 0,
       __v: 0,
     }
-  );
+  )
+  .sort({flightNumber: 1})
+  .skip(skip)
+  .limit(limit);
 }
 
 async function saveLaunch(launch) {
-  const planet = await planetsMongo.findOne({
-    keplerName: launch.target,
-  });
-
-  if (!planet) {
-    throw new Error(`Planet ${launch.target} not found`);
-  }
+  
 
   await launchesModel.updateOne(
     {
@@ -136,6 +128,14 @@ export const abortedLaunchById = async (flightNumber) => {
 };
 
 export const scheduleLaunch = async (launch) => {
+  const planet = await planetsMongo.findOne({
+    keplerName: launch.target,
+  });
+
+  if (!planet) {
+    throw new Error(`Planet ${launch.target} not found`);
+  }
+
   const newFlightNumber = (await getLatestFlightNumber()) + 1;
   const newLaunch = Object.assign(launch, {
     success: true,
