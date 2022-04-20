@@ -5,6 +5,8 @@ const PORT = process.env.PORT || 4000;
 const MONGO_URL = 'mongodb+srv://admin:111112113aA@nasa.dtsdf.mongodb.net/nasa?retryWrites=true&w=majority'
 
 const {loadPlanetsData } = require('./models/planets.model');
+const {loadLaunchesData} = require('./models/launches.model');
+
 const server = http.createServer(app);
 
 mongoose.connection.on('open', () => {
@@ -21,6 +23,7 @@ async function start() {
     useUnifiedTopology: true
   })
   await loadPlanetsData();
+  await loadLaunchesData();
   server.listen(PORT);
   console.log(`Server running on port ${PORT}`);
 }

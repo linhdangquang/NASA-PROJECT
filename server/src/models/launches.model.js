@@ -1,25 +1,90 @@
 import launchesMongo from './launches.mongo';
 import launchesModel from './launches.mongo';
 import planetsMongo from './planets.mongo';
-const launches = new Map();
+import axios from 'axios';
 
 let DEFAULT_FLIGHT_NUMBER = 100;
 
 const launch = {
-  flightNumber: 100,
-  mission: 'Komodo Dragon',
-  rocket: 'Falcon 9',
-  launchDate: new Date('Dec 17, 2030'),
-  target: 'Kepler-1410 b',
-  customers: ['NASA', 'SpaceX'],
-  upcoming: true,
-  success: true,
+  flightNumber: 100, //flight_number,
+  mission: 'Komodo Dragon', //name
+  rocket: 'Falcon 9', //rocket_name,
+  launchDate: new Date('Dec 17, 2030'), //date_local
+  target: 'Kepler-1410 b', //not applicable
+  customers: ['NASA', 'SpaceX'], //payload.customers for each payload
+  upcoming: true, // upcoming
+  success: true, // success
 };
 
 saveLaunch(launch);
 
+const SPACEX_API_URL = 'https://api.spacexdata.com/v4/launches/query';
+
+async function populateLaunches() {
+  console.log('Loading data...');
+  const res = await axios.post(SPACEX_API_URL, {
+    query: {},
+    options: {
+      pagination: false,
+      populate: [
+        {
+          path: 'rocket',
+          select: {
+            name: 1,
+          },
+        },
+        {
+          path: 'payloads',
+          select: {
+            'customers': 1,
+          },
+        },
+      ],
+    },
+  });
+  const launchDocs = res.data.docs;
+  for(const launchDoc of launchDocs) {
+    const payloads = launchDoc['payloads'];
+    const customers = payloads.flatMap((payload) => {
+      return payload['customers'];
+    })
+
+    const launch = {
+      flightNumber: launchDoc['flight_number'],
+      mission: launchDoc['name'],
+      rocket: launchDoc['rocket']['name'],
+      launchDate: launchDoc['date_local'],
+      upcoming: launchDoc['upcoming'],
+      success: launchDoc['success'],
+      customers,
+    }
+    console.log(`Saving launch ${launch.flightNumber} ${launch.mission}`);
+
+    // populate launches collection
+  }
+}
+
+export async function loadLaunchesData() {
+  const firstLaunch = await findLaunch({
+    flightNumber: 1,
+    rocket: 'Falcon 1',
+    mission: 'FalconSat',
+  })
+  if (firstLaunch) {
+    console.log('Launches already loaded');
+    return;
+   }else {
+     await populateLaunches();
+   }
+  
+}
+
+export async function findLaunch(filter) {
+  return await launchesMongo.findOne(filter);
+}
+
 export const existLaunch = async (flightNumber) => {
-  return await launchesMongo.findOne({
+  return await findLaunch({
     flightNumber, // { flightNumber: flightNumber }
   });
 };
@@ -58,17 +123,20 @@ async function saveLaunch(launch) {
 }
 
 export const abortedLaunchById = async (flightNumber) => {
-  const aborted =  launchesModel.updateOne({
-    flightNumber,
-  }, {
-    upcoming: false,
-    success: false,
-  })
+  const aborted = launchesModel.updateOne(
+    {
+      flightNumber,
+    },
+    {
+      upcoming: false,
+      success: false,
+    }
+  );
   return aborted;
 };
 
 export const scheduleLaunch = async (launch) => {
-  const newFlightNumber = await getLatestFlightNumber() + 1;
+  const newFlightNumber = (await getLatestFlightNumber()) + 1;
   const newLaunch = Object.assign(launch, {
     success: true,
     upcoming: true,
@@ -78,5 +146,3 @@ export const scheduleLaunch = async (launch) => {
 
   await saveLaunch(newLaunch);
 };
-
-
